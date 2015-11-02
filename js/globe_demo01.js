@@ -129,10 +129,10 @@ uniforms[ "specular" ].value.convertGammaToLinear();
 uniforms[ "ambient" ].value.convertGammaToLinear();
 
 uniforms[ "enableDisplacement" ] = { type: 'i', value: 1 };
-uniforms[ "uDisplacementScale" ] = { type: 'f', value: 100 };
+uniforms[ "uDisplacementScale" ] = { type: 'f', value: 150 };
 uniforms[ "uDisplacementPostScale" ] = {type: 'f', value: 50 };
 
-uniforms[ "bumpScale" ] = { type: "f", value: 57.0 };
+uniforms[ "bumpScale" ] = { type: "f", value: 150.0 };
 uniforms[ "opacity" ] = { type: "f", value: 1.0 };
 uniforms[ "uNormalOffset" ] = { type: "v2", value: new THREE.Vector2( 1.0, 1.0 ) };
 
