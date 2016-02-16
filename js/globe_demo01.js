@@ -16,9 +16,8 @@ var normalize = false;
 
 var normScene, normCamera, normTexture, normTextureMat, normTextureGeo;
 var mats, textureMats;
-var easeType;
 
-var loopSteps = 50;
+var loopSteps = 30;
 
 var clock = new THREE.Clock();
 
@@ -77,15 +76,13 @@ var height = renderer.domElement.height;
 var aspect = width / height; // view aspect ratio
 camera = new THREE.PerspectiveCamera( fov, aspect, .1, 10000 );
 scene.add(camera);
-camera.position.z = -900;
+camera.position.z = -800;
 camera.position.y = 400;
 camera.updateMatrix();
 camera.lookAt(scene.position);
 camera.rotateZ(.3);
 	// adjust container size to window, then
 	// fit renderer and camera to container
-	// container.style.marginLeft = container.offsetWidth / 2 * -1 + "px";
-	// globeResize();	
 
 // --- Light def
     
@@ -117,7 +114,6 @@ uniforms[ "tDisplacement" ] = { type: 't', value: globeTexture.texture2 };
 
 uniforms[ "uPointLightPos"] =   { type: "v3", value: pointLight.position },
 uniforms[ "uPointLightColor" ] = {type: "c", value: new THREE.Color( pointLight.color )};
-uniforms[ "uAmbientLightColor" ] = {type: "c", value: new THREE.Color( ambientLight.color )};
 
 uniforms[ "matrightBottom" ] = { type: 'v2', value: new THREE.Vector2( 180.0, -90.0 ) };
 uniforms[ "matleftTop" ] = { type: 'v2', value: new THREE.Vector2( -180.0, 90.0 ) };
@@ -160,8 +156,6 @@ globeMesh = new THREE.Mesh( globeGeo, material);
 
 
 scene.add(globeMesh);
-
-easeType = TWEEN.Easing.Quartic.InOut;
 
 // calculate all textures
 for (x in RTTs) prepTextures(RTTs[x]);
@@ -342,12 +336,8 @@ globeRotation = .005;
 
 window.onload = function() {
 
-	// switch images based on window width
-	large = $(window).width() < 1200 ? false : true;
-	log("large: "+large);
 	// load dem textures first thing
-	globeImage = THREE.ImageUtils.loadTexture(
-		large ? './img/Srtm.2k_norm.jpg' : './img/Srtm.1k_norm.jpg',
+	globeImage = THREE.ImageUtils.loadTexture('./img/Srtm.1k_norm.jpg',
 		new THREE.UVMapping(),
 		// callback function
 		function() {
