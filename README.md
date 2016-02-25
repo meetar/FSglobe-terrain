@@ -17,5 +17,5 @@ https://github.com/meetar/heightmap-demos
 
 As well as more detail about the theory;
 
-http://edgeca.se/the-lay-of-the-land/
+http://fjord.style/the-lay-of-the-land
 
