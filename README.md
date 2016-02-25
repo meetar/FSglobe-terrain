@@ -9,7 +9,7 @@ live demo: http://meetar.github.io/globe-terrain/
 
 Associated post:
 
-http://edgeca.se/going-into-detail/
+http://fjord.style/going-into-detail
 
 More detailed demos of the underlying technique are here:
 
