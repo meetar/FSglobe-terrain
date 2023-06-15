@@ -49,15 +49,21 @@ container = document.getElementById( 'globecontainer' );
 
 // --- WebGl renderer
 
+var url = 'https://meetar.github.io/FSglobe-terrain/'
 try {
     renderer = new THREE.WebGLRenderer( { alpha: true, 'antialias':false } );
     renderer.setSize( container.scrollWidth, container.scrollHeight );
-			renderer.setClearColor(0xffffff);
-			renderer.autoClear = false;
+		renderer.setClearColor(0xffffff);
+		renderer.autoClear = false;
     container.appendChild( renderer.domElement );
-}
-catch (e) {
-    alert(e);
+
+		var message = {FSsuccess: true};
+		window.parent.postMessage(message, url);
+	}
+	catch (e) {
+		var message = {FSsuccess: false};
+		window.parent.postMessage(message, url);
+    console.error(e);
 }
 	
 	
