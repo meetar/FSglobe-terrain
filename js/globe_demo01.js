@@ -1,4 +1,4 @@
-startTime = new Date();  
+startTime = new Date();
 
 // globals
 var camera, scene, renderer, container;
@@ -24,7 +24,7 @@ var clock = new THREE.Clock();
 //
 // HELPER FUNCTIONS
 //
-	
+
 function log(n) { console.log(n); }
 
 function rads(x) { return x*Math.PI/180; }
@@ -65,15 +65,15 @@ try {
 		window.parent.postMessage(message, url);
     console.error(e);
 }
-	
-	
+
+
 	//
 	// MASTER SCENE SETUP
 	//
-	
+
 scene = new THREE.Scene();
 
-    
+
 // --- Camera def
 
 var fov = 15; // camera field-of-view in degrees
@@ -91,17 +91,17 @@ camera.rotateZ(.3);
 	// fit renderer and camera to container
 
 // --- Light def
-    
+
 ambientLight = new THREE.AmbientLight( 0x000000 );
 scene.add( ambientLight );
 
 pointLight = new THREE.PointLight( 0xbbbbbb );
-	
+
 pointLight.position.set(0, 200, -300);
 
 
 // MATERIALS
-	
+
 var ambient = 0xffffff, diffuse = 0xffffff, specular = 1, shininess = 10.0, scale = 100;
 
 var shader = THREE.ShaderLib[ "normalmap" ];
@@ -109,7 +109,7 @@ uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
 flatNormalTex = THREE.ImageUtils.loadTexture( './img/flat.png', new THREE.UVMapping(), function () { render(); });
 uniforms[ "tNormal" ] = { type: 't', value: flatNormalTex };
-	
+
 uniforms[ "diffuse" ].value.setHex( diffuse );
 uniforms[ "specular" ].value = new THREE.Color().setRGB(specular, specular, specular);
 uniforms[ "ambient" ].value.setHex( ambient );
@@ -143,7 +143,7 @@ material = new THREE.ShaderMaterial( {
     vertexShader: shaders.vs_main,
     fragmentShader: shaders.fs_main,
 } );
-	
+
 globeTexture.textureMat2.uniforms.u_erode.value = .006;
 globeTexture.textureMat2.uniforms.u_dilate.value = .005;
 globeTexture.textureMat.uniforms.u_erode.value = .006;
@@ -154,7 +154,7 @@ textureMats = [globeTexture.textureMat, globeTexture.textureMat2];
 
 
 // GEOMETRY
-	
+
 globeGeo = new THREE.PlaneGeometry(10, 10, 257, 129);
 globeGeo.computeTangents();
 globeMesh = new THREE.Mesh( globeGeo, material);
@@ -196,34 +196,34 @@ function prepTextures(myRTT) {
 	// could interleave them but with current setup that would involve
 	// recompiling the materials every frame.
 	// todo: make four FBOs with dedicated shader assignments
-	
+
 	// firstShader = fs_dilate, secondShader = fs_erode;
 	firstShader = shaders.fs_erode, secondShader = shaders.fs_dilate; // this feels better - science!
-	
+
 	// set first shader
 	myRTT.textureMat.fragmentShader = firstShader;
 	myRTT.textureMat.needsUpdate = true;
 
 	myRTT.textureMat2.fragmentShader = firstShader;
 	myRTT.textureMat2.needsUpdate = true;
-	
+
 	// initialize first RTT FBO's colorMap with the source image
 	myRTT.textureMat.uniforms.colorMap.value = myRTT.image;
-	
+
 	// render first FBO with erode shader
 	renderer.render( myRTT.scene, myRTT.camera, myRTT.texture, false );
-				
+
 	// then switch first FBO's colorMap to second FBO
 	myRTT.textureMat.uniforms.colorMap.value = myRTT.texture2;
-	
+
 	// while ( myRTT.textureMat.uniforms.u_unchanged == 0.0 ) {
 	// would be nice to have some kind of switch that turned the loop off
 	// when there was no difference detected between the two FBOs.
-	// I suppose I'd need a third shader to do a diff... 
+	// I suppose I'd need a third shader to do a diff...
 	for (x=0;x<loopSteps;x++) {
 		calculate(myRTT);
 	}
-	
+
 	// switch shaders
 	myRTT.textureMat.fragmentShader = secondShader;
 	myRTT.textureMat.needsUpdate = true;
@@ -235,12 +235,12 @@ function prepTextures(myRTT) {
 	for (x=0;x<loopSteps;x++) {
 		calculate(myRTT);
 	}
-	
-	if (normalize) {		
+
+	if (normalize) {
 		//
 		// find maximum value in texture
 		//
-		
+
 		myRTT.textureMat.fragmentShader = shaders.fs_maximum;
 		myRTT.textureMat.needsUpdate = true;
 
@@ -251,7 +251,7 @@ function prepTextures(myRTT) {
 
 		// then set normTextureMat's input map to first FBO
 		normTextureMat.uniforms.colorMap.value = myRTT.texture;
-		
+
 		// set FBO's input map to normmat
 		myRTT.textureMat.uniforms.colorMap.value = normTexture;
 
@@ -341,27 +341,28 @@ globeRotation = .005;
 //
 
 const shaderNames = [
-	"vs_rt", 	// Render-to-texture vertex shader 
-	"fs_erode", // RTT erosion fragment shader 
-	"fs_dilate", // RTT dilation fragment shader 
+	"vs_rt", 	// Render-to-texture vertex shader
+	"fs_erode", // RTT erosion fragment shader
+	"fs_dilate", // RTT dilation fragment shader
 
 	// this shader outputs as its final fragment the brightest value in the input
-	// texture - the result is used by the fs_rtt shader to normalize the input texture 
-	// maximum-finding fragment shader 
-	"fs_maximum", 
+	// texture - the result is used by the fs_rtt shader to normalize the input texture
+	// maximum-finding fragment shader
+	"fs_maximum",
 
 	// final RTT output shader - takes as input the result of the
-	// erode/dilate shaders and the normalization shader 
-	// image normalization fragment shader 
-	"fs_rtt", 
+	// erode/dilate shaders and the normalization shader
+	// image normalization fragment shader
+	"fs_rtt",
 
-	// MAIN SHADERS 
+	// MAIN SHADERS
 
-	// ----- VERTEX SHADER ----- 
-	"vs_main", 
-	// ----- FRAGMENT SHADER ----- 
-	"fs_main", 
+	// ----- VERTEX SHADER -----
+	"vs_main",
+	// ----- FRAGMENT SHADER -----
+	"fs_main",
 ];
+
 var shaders= {}
 
   // Function to load an external script and get its content
@@ -374,37 +375,30 @@ var shaders= {}
       });
   }
 
-
-
 window.onload = async function() {
 
   // Load shaders asynchronously
   Promise.all(shaderNames.map(name => {
     const scriptElement = document.querySelector(`link[data-name="${name}_txt"]`);
-		console.log(scriptElement);
     const shaderUrl = scriptElement.getAttribute('href');
 		// console.log(shaderUrl);
     return loadShader(shaderUrl).then(shaderContent => {
 			// console.log(shaderContent);
       shaders[name] = shaderContent;
     });
-  }))
+  })).then(() => {
 
-	// then load dem textures
-	globeImage = THREE.ImageUtils.loadTexture('./img/Srtm.1k_norm.jpg',
-		new THREE.UVMapping(),
-		// callback function
-		function() {
-			globeTexture = prepRTT(globeImage, shaders.vs_rt, shaders.fs_dilate);
-			addRTT("globe", globeTexture);
-		}
+			// then load dem textures
+			globeImage = THREE.ImageUtils.loadTexture('./img/Srtm.1k_norm.jpg',
+				new THREE.UVMapping(),
+				// callback function
+				function() {
+					globeTexture = prepRTT(globeImage, shaders.vs_rt, shaders.fs_dilate);
+					addRTT("globe", globeTexture);
+				}
+		)}
 	);
-
-}									;
-
-
-	
-
+};
 
 // create custom RTT scenes for a texture
 function addRTT(name, texture) {
@@ -415,9 +409,9 @@ function addRTT(name, texture) {
 		if (normalize) {
 			// setup normalizing scene
 			normScene = new THREE.Scene();
-					
+
 			// create buffer - initialize with size 1 - will be adjusted by adjustNormScene()
-			normTexture = new THREE.WebGLRenderTarget( 1, 1 );		
+			normTexture = new THREE.WebGLRenderTarget( 1, 1 );
 
 			// custom RTT material
 			normUniforms = {
@@ -429,8 +423,8 @@ function addRTT(name, texture) {
 				uniforms: normUniforms,
 				vertexShader: shaders.vs_rt,
 				fragmentShader: shaders.fs_maximum
-			});		
-	
+			});
+
 			// Setup render-to-texture scene
 			normCamera = new THREE.OrthographicCamera( 1 / - 2, 1 / 2, 1 / 2, 1 / - 2, 1, 10000 );
 
@@ -443,10 +437,10 @@ function addRTT(name, texture) {
 
 	}
 }
-	
+
 function adjustNormScene(width, height) {
 		// recreate buffer
-		normTexture = new THREE.WebGLRenderTarget( width, height, renderTargetParams );	
+		normTexture = new THREE.WebGLRenderTarget( width, height, renderTargetParams );
 		// update debug plane's material
 		myDbgMat3.map = normTexture;
 		// resize texture to match image size
@@ -459,23 +453,4 @@ function adjustNormScene(width, height) {
 		normTextureMesh.position.z = -100;
 		normScene.add( normTextureMesh );
 		normCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 10000 );
-}
-	
-async function loadShaders() {
-
-	// IMAGE PROCESSING SHADERS 
-	
-	const urls = [
-	]
-
-	return Promise.all(
-		urls.map(url => fetch("./shaders/"+url+".js").then(response => response.text()))
-	).then(results => {
-		console.log('results?', results);
-		return results;
-	})
-	.catch(error => {
-		console.error(error);
-	})
-	
 }
