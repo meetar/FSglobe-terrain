@@ -39,12 +39,12 @@ function setMatUniform(name, value) {
 
 
 
-
 //
 // START THE MACHINE
 //
 
-function init() {
+async function init() {
+
 container = document.getElementById( 'globecontainer' );
 
 // --- WebGl renderer
@@ -140,8 +140,8 @@ uniforms[ "uNormalOffset" ] = { type: "v2", value: new THREE.Vector2( 1.0, 1.0 )
 
 material = new THREE.ShaderMaterial( {
     uniforms: uniforms,
-    vertexShader: vs_main,
-    fragmentShader: fs_main,
+    vertexShader: shaders.vs_main,
+    fragmentShader: shaders.fs_main,
 } );
 	
 globeTexture.textureMat2.uniforms.u_erode.value = .006;
@@ -198,7 +198,7 @@ function prepTextures(myRTT) {
 	// todo: make four FBOs with dedicated shader assignments
 	
 	// firstShader = fs_dilate, secondShader = fs_erode;
-	firstShader = fs_erode, secondShader = fs_dilate; // this feels better - science!
+	firstShader = shaders.fs_erode, secondShader = shaders.fs_dilate; // this feels better - science!
 	
 	// set first shader
 	myRTT.textureMat.fragmentShader = firstShader;
@@ -241,7 +241,7 @@ function prepTextures(myRTT) {
 		// find maximum value in texture
 		//
 		
-		myRTT.textureMat.fragmentShader = fs_maximum;
+		myRTT.textureMat.fragmentShader = shaders.fs_maximum;
 		myRTT.textureMat.needsUpdate = true;
 
 		// adjust normal texture size to match RTT texture size, if needed
@@ -269,7 +269,7 @@ function prepTextures(myRTT) {
 			renderer.render( normScene, normCamera, normTexture, true );
 		}
 		// change FBO's shader to final output shader
-		myRTT.textureMat.fragmentShader = fs_rtt;
+		myRTT.textureMat.fragmentShader = shaders.fs_rtt;
 		myRTT.textureMat.needsUpdate = true;
 
 		// set FBO's input maps
@@ -340,19 +340,67 @@ globeRotation = .005;
 // onload
 //
 
-window.onload = function() {
+const shaderNames = [
+	"vs_rt", 	// Render-to-texture vertex shader 
+	"fs_erode", // RTT erosion fragment shader 
+	"fs_dilate", // RTT dilation fragment shader 
 
-	// load dem textures first thing
+	// this shader outputs as its final fragment the brightest value in the input
+	// texture - the result is used by the fs_rtt shader to normalize the input texture 
+	// maximum-finding fragment shader 
+	"fs_maximum", 
+
+	// final RTT output shader - takes as input the result of the
+	// erode/dilate shaders and the normalization shader 
+	// image normalization fragment shader 
+	"fs_rtt", 
+
+	// MAIN SHADERS 
+
+	// ----- VERTEX SHADER ----- 
+	"vs_main", 
+	// ----- FRAGMENT SHADER ----- 
+	"fs_main", 
+];
+var shaders= {}
+
+  // Function to load an external script and get its content
+  function loadShader(url) {
+    return fetch(url)
+      .then(response => response.text())
+      .catch(error => {
+        console.error(`Failed to load shader from ${url}: ${error}`);
+        return '';
+      });
+  }
+
+
+
+window.onload = async function() {
+
+  // Load shaders asynchronously
+  Promise.all(shaderNames.map(name => {
+    const scriptElement = document.querySelector(`link[data-name="${name}_txt"]`);
+		console.log(scriptElement);
+    const shaderUrl = scriptElement.getAttribute('href');
+		// console.log(shaderUrl);
+    return loadShader(shaderUrl).then(shaderContent => {
+			// console.log(shaderContent);
+      shaders[name] = shaderContent;
+    });
+  }))
+
+	// then load dem textures
 	globeImage = THREE.ImageUtils.loadTexture('./img/Srtm.1k_norm.jpg',
 		new THREE.UVMapping(),
 		// callback function
 		function() {
-			globeTexture = prepRTT(globeImage, vs, fs_dilate);
+			globeTexture = prepRTT(globeImage, shaders.vs_rt, shaders.fs_dilate);
 			addRTT("globe", globeTexture);
 		}
 	);
 
-}									
+}									;
 
 
 	
@@ -379,8 +427,8 @@ function addRTT(name, texture) {
 			};
 			normTextureMat = new THREE.ShaderMaterial({
 				uniforms: normUniforms,
-				vertexShader: vs,
-				fragmentShader: fs_maximum
+				vertexShader: shaders.vs_rt,
+				fragmentShader: shaders.fs_maximum
 			});		
 	
 			// Setup render-to-texture scene
@@ -413,21 +461,21 @@ function adjustNormScene(width, height) {
 		normCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 10000 );
 }
 	
+async function loadShaders() {
 
-var vs, fs_erode, fs_dilate, fs_maximum, fs_rtt, vs_main, fs_main;
-
-SHADER_LOADER.load(
-    function (data)
-    {
-        vs = data.vs_rt.vertex;
-        fs_erode = data.fs_erode.fragment;
-        fs_dilate = data.fs_dilate.fragment;
-					if (normalize) fs_maximum = data.fs_maximum.fragment;
-        fs_rtt = data.fs_rtt.fragment;
-					
-        vs_main = data.vs_main.vertex;
-					fs_main = data.fs_main.fragment;
-
-    }
-);
+	// IMAGE PROCESSING SHADERS 
 	
+	const urls = [
+	]
+
+	return Promise.all(
+		urls.map(url => fetch("./shaders/"+url+".js").then(response => response.text()))
+	).then(results => {
+		console.log('results?', results);
+		return results;
+	})
+	.catch(error => {
+		console.error(error);
+	})
+	
+}
