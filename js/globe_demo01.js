@@ -144,10 +144,10 @@ material = new THREE.ShaderMaterial( {
     fragmentShader: shaders.fs_main,
 } );
 
-globeTexture.textureMat2.uniforms.u_erode.value = .006;
-globeTexture.textureMat2.uniforms.u_dilate.value = .005;
-globeTexture.textureMat.uniforms.u_erode.value = .006;
-globeTexture.textureMat.uniforms.u_dilate.value = .005;
+globeTexture.textureMat2.uniforms.u_erode.value = .004;
+globeTexture.textureMat2.uniforms.u_dilate.value = .006;
+globeTexture.textureMat.uniforms.u_erode.value = .004;
+globeTexture.textureMat.uniforms.u_dilate.value = .006;
 
 
 textureMats = [globeTexture.textureMat, globeTexture.textureMat2];
@@ -155,6 +155,8 @@ textureMats = [globeTexture.textureMat, globeTexture.textureMat2];
 
 // GEOMETRY
 
+// THREE.PlaneGeometry(width, height, widthSegments, heightSegments)
+// segments are pow2 + 1 so the number of internal non-edge verts is pow2 to match texture
 globeGeo = new THREE.PlaneGeometry(10, 10, 257, 129);
 globeGeo.computeTangents();
 globeMesh = new THREE.Mesh( globeGeo, material);
